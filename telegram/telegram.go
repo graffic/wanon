@@ -5,37 +5,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/op/go-logging"
 )
 
-type TelegramResponse struct {
-	Ok     bool            `json:ok`
-	Result json.RawMessage `json:result`
+var log = logging.MustGetLogger("wanon.telegram")
+
+// API holds the API configuration and methods
+type API struct {
+	baseURL string
 }
 
-type TelegramUser struct {
-	Id        int    `json:id`
-	FirstName string `json:first_name`
-	LastName  string `json:last_name`
-	Username  string `json:username`
+// Configuration settings
+type Configuration struct {
+	Token string
 }
 
-type TelegramApi struct {
-	baseUrl string
-}
-
-type TelegramUpdate struct {
-	UpdateId int             `json:"update_id"`
-	Message  TelegramMessage `json:message`
-}
-
-type TelegramMessage struct {
-	MessageId int
-	Text      string
-}
-
-func call(url string) (TelegramResponse, error) {
-	var response TelegramResponse
-	//fmt.Println(url)
+func call(url string) (Response, error) {
+	var response Response
+	// log.Debug(url)
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -44,15 +32,16 @@ func call(url string) (TelegramResponse, error) {
 
 	defer resp.Body.Close()
 	bytes, err := ioutil.ReadAll(resp.Body)
-	//fmt.Println(string(bytes))
+	log.Debug(string(bytes))
 	json.Unmarshal(bytes, &response)
 
 	return response, nil
 }
 
-func (api *TelegramApi) GetMe() TelegramUser {
-	var user TelegramUser
-	response, err := call(api.baseUrl + "getMe")
+// GetMe checks the token validity
+func (api *API) GetMe() User {
+	var user User
+	response, err := call(api.baseURL + "getMe")
 
 	if err != nil {
 		fmt.Println(err)
@@ -63,9 +52,11 @@ func (api *TelegramApi) GetMe() TelegramUser {
 	return user
 }
 
-func (api *TelegramApi) GetUpdates(offset int) []TelegramUpdate {
-	var update []TelegramUpdate
-	url := fmt.Sprintf("%sgetUpdates?offset=%d&timeout=5", api.baseUrl, offset)
+// GetUpdates from telegram
+func (api *API) GetUpdates(offset int) []Update {
+	var update []Update
+	url := fmt.Sprintf("%sgetUpdates?offset=%d&timeout=5", api.baseURL, offset)
+	log.Info("getting updates...")
 	response, err := call(url)
 	if err != nil {
 		fmt.Println(err)
@@ -76,19 +67,21 @@ func (api *TelegramApi) GetUpdates(offset int) []TelegramUpdate {
 	return update
 }
 
-func NewTelegramApi(token string) TelegramApi {
-	baseUrl := "https://api.telegram.org/bot" + token + "/"
-	return TelegramApi{baseUrl}
+// NewAPI creates a new api from a token
+func NewAPI(conf Configuration) API {
+	baseURL := "https://api.telegram.org/bot" + conf.Token + "/"
+	return API{baseURL}
 }
 
-func ProcessUpdates(api *TelegramApi, out chan *TelegramMessage) {
-	lastMessageId := 0
-	for 1 == 1 {
-		update := api.GetUpdates(lastMessageId)
+// ProcessUpdates from the telegram api
+func (api *API) ProcessUpdates(out chan *Message) {
+	lastMessageID := 0
+	for {
+		update := api.GetUpdates(lastMessageID)
 
 		for _, element := range update {
-			if element.UpdateId >= lastMessageId {
-				lastMessageId = element.UpdateId + 1
+			if element.UpdateID >= lastMessageID {
+				lastMessageID = element.UpdateID + 1
 			}
 			out <- &element.Message
 		}
