@@ -14,7 +14,7 @@ var log = logging.MustGetLogger("wanon")
 func initLogging() {
 	backend := logging.NewLogBackend(os.Stderr, "", 0)
 	format := logging.MustStringFormatter(
-		"%{color}%{time:15:04:05.000} %{module}💾 %{level:.5s} %{color:reset} %{message}",
+		"%{color}%{time:15:04:05.000} %{level:5.5s} %{module} >%{color:reset} %{message}",
 	)
 	formatter := logging.NewBackendFormatter(backend, format)
 
@@ -22,26 +22,40 @@ func initLogging() {
 	logging.SetBackend(formatter)
 }
 
-func createAPI(conf *bot.ConfService) *telegram.API {
-	var apiConf telegram.Configuration
-	conf.Get(&apiConf)
-	api := telegram.NewAPI(apiConf)
-	result := api.GetMe()
-	log.Info("%s online", result.Username)
-
-	return &api
-}
-
-func main() {
-	initLogging()
-
-	conf, err := bot.LoadConf("conf.yaml")
+func checkFatal(err error) {
 	if err != nil {
 		log.Fatal(err)
 		os.Exit(1)
 	}
+}
 
-	api := createAPI(conf)
+func createAPI(conf *bot.ConfService) (*telegram.API, error) {
+	var apiConf telegram.Configuration
+	conf.Get(&apiConf)
+	api := telegram.NewAPI(apiConf)
+	result, err := api.GetMe()
+	if err != nil {
+		return nil, err
+	}
+	log.Info("%s online", result.Username)
+
+	return &api, nil
+}
+
+func main() {
+	initLogging()
+	log.Debug("Wanon booting")
+
+	conf, err := bot.LoadConf("conf.yaml")
+	checkFatal(err)
+
+	_, err2 := bot.NewStorage(conf)
+	checkFatal(err2)
+
+	api, err3 := createAPI(conf)
+	checkFatal(err3)
+
+	log.Info("All systems nominal")
 
 	channel := make(chan *telegram.Message)
 	go api.ProcessUpdates(channel)

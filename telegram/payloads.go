@@ -30,14 +30,17 @@ type Update struct {
 
 // UserAndGroup embeds user and group together
 type UserAndGroup struct {
+	User
+	GroupChat
 	ID int `json:"id"`
 }
 
 // Message payload
 type Message struct {
-	MessageID int
-	From      User
-	Text      string
-	Date      int
-	Chat      UserAndGroup `json:"chat"`
+	MessageID      int          `json:"message_id"`
+	From           User         `json:"from"`
+	Text           string       `json:"text"`
+	Date           int          `json:"date"`
+	Chat           UserAndGroup `json:"chat"`
+	ReplyToMessage *Message     `json:"reply_to_message"`
 }

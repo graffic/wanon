@@ -39,17 +39,16 @@ func call(url string) (Response, error) {
 }
 
 // GetMe checks the token validity
-func (api *API) GetMe() User {
+func (api *API) GetMe() (User, error) {
 	var user User
 	response, err := call(api.baseURL + "getMe")
 
 	if err != nil {
-		fmt.Println(err)
-		return user
+		return user, err
 	}
 
 	json.Unmarshal(response.Result, &user)
-	return user
+	return user, nil
 }
 
 // GetUpdates from telegram

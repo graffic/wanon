@@ -13,30 +13,19 @@ const (
 	RouteStop
 )
 
-// HandlerCheck Checks if a message is for the handler
-type HandlerCheck func(*telegram.Message) int
-
-// Handle executes the action
-type Handle func(*telegram.Message)
-
 // Handler pairs a check and a handle function
-type Handler struct {
-	check  HandlerCheck
-	handle Handle
-}
-
-// NewHandler creates a Handler struct
-func NewHandler(check HandlerCheck, handle Handle) Handler {
-	return Handler{check, handle}
+type Handler interface {
+	Check(*telegram.Message) int
+	Handle(*telegram.Message)
 }
 
 // Router stores handlers for messages
 type Router struct {
-	handles []*Handler
+	handles []Handler
 }
 
 // AddHandler adds a handler to the router
-func (router *Router) AddHandler(handler *Handler) {
+func (router *Router) AddHandler(handler Handler) {
 	router.handles = append(router.handles, handler)
 }
 
@@ -46,9 +35,9 @@ func (router *Router) RouteMessages(messages chan *telegram.Message) {
 		message := <-messages
 
 		for _, handler := range router.handles {
-			result := handler.check(message)
+			result := handler.Check(message)
 			if (result & RouteAccept) > 0 {
-				handler.handle(message)
+				handler.Handle(message)
 			}
 			if (result & RouteStop) > 0 {
 				break
