@@ -28,8 +28,6 @@ func NewStorage(conf *ConfService) (*Storage, error) {
 		return nil, err
 	}
 
-	jb.CreateColl("counters", nil)
-
 	storage := new(Storage)
 	storage.jb = jb
 
@@ -53,5 +51,10 @@ func (storage *Storage) AddQuote(chat int, quote interface{}) error {
 		return err3
 	}
 
+	return nil
+}
+
+// RQuote get a random quote - ToDo
+func (storage *Storage) RQuote(chat int) error {
 	return nil
 }
