@@ -15,8 +15,8 @@ const (
 
 // Handler pairs a check and a handle function
 type Handler interface {
-	Check(*telegram.Message) int
-	Handle(*telegram.Message)
+	Check(*telegram.Message, *Context) int
+	Handle(*telegram.Message, *Context)
 }
 
 // Router stores handlers for messages
@@ -30,14 +30,14 @@ func (router *Router) AddHandler(handler Handler) {
 }
 
 // RouteMessages checks which handler is the destination of a message
-func (router *Router) RouteMessages(messages chan *telegram.Message) {
+func (router *Router) RouteMessages(messages chan *telegram.Message, context *Context) {
 	for {
 		message := <-messages
 
 		for _, handler := range router.handles {
-			result := handler.Check(message)
+			result := handler.Check(message, context)
 			if (result & RouteAccept) > 0 {
-				handler.Handle(message)
+				handler.Handle(message, context)
 			}
 			if (result & RouteStop) > 0 {
 				break

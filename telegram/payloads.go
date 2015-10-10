@@ -11,9 +11,9 @@ type Response struct {
 // User payload
 type User struct {
 	ID        int    `json:"id"`
+	Username  string `json:"username"`
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
-	Username  string `json:"username"`
 }
 
 // GroupChat payload
@@ -28,19 +28,34 @@ type Update struct {
 	Message  Message `json:"message"`
 }
 
-// UserAndGroup embeds user and group together
-type UserAndGroup struct {
-	User
-	GroupChat
-	ID int `json:"id"`
+// Chat payload
+type Chat struct {
+	ID        int    `json:"id"`
+	Type      string `json:"type"`
+	Title     string `json:"title"`
+	Username  string `json:"username"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 // Message payload
 type Message struct {
-	MessageID      int          `json:"message_id"`
-	From           User         `json:"from"`
-	Text           string       `json:"text"`
-	Date           int          `json:"date"`
-	Chat           UserAndGroup `json:"chat"`
-	ReplyToMessage *Message     `json:"reply_to_message"`
+	MessageID      int      `json:"message_id"`
+	From           User     `json:"from"`
+	Text           string   `json:"text"`
+	Date           int      `json:"date"`
+	Chat           Chat     `json:"chat"`
+	ReplyToMessage *Message `json:"reply_to_message"`
+}
+
+// SendMessaction action parameter
+type SendMessage struct {
+	ChatID int    `json:"chat_id"`
+	Text   string `json:"text"`
+}
+
+// GetUpdates action parameter
+type GetUpdates struct {
+	Offset  int `json:"offset"`
+	Timeout int `json:"timeout"`
 }

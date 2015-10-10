@@ -1,6 +1,7 @@
 package telegram
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -21,27 +22,39 @@ type Configuration struct {
 	Token string
 }
 
-func call(url string) (Response, error) {
-	var response Response
-	// log.Debug(url)
-	resp, err := http.Get(url)
+func (api *API) call(method string, in interface{}) (*Response, error) {
+	url := fmt.Sprintf("%s%s", api.baseURL, method)
+	var response *http.Response
+	var err error
 
+	if in == nil {
+		response, err = http.Get(url)
+	} else {
+		outData, err := json.Marshal(in)
+		if err != nil {
+			return nil, err
+		}
+		log.Debug("Request: " + string(outData))
+		response, err = http.Post(url, "application/json", bytes.NewBuffer(outData))
+	}
 	if err != nil {
-		return response, err
+		return nil, err
 	}
 
-	defer resp.Body.Close()
-	bytes, err := ioutil.ReadAll(resp.Body)
-	log.Debug(string(bytes))
-	json.Unmarshal(bytes, &response)
+	defer response.Body.Close()
+	bytes, err := ioutil.ReadAll(response.Body)
+	log.Debug("Response: " + string(bytes))
 
-	return response, nil
+	var out Response
+	json.Unmarshal(bytes, &out)
+
+	return &out, nil
 }
 
 // GetMe checks the token validity
 func (api *API) GetMe() (User, error) {
 	var user User
-	response, err := call(api.baseURL + "getMe")
+	response, err := api.call("getMe", nil)
 
 	if err != nil {
 		return user, err
@@ -54,11 +67,11 @@ func (api *API) GetMe() (User, error) {
 // GetUpdates from telegram
 func (api *API) GetUpdates(offset int) []Update {
 	var update []Update
-	url := fmt.Sprintf("%sgetUpdates?offset=%d&timeout=5", api.baseURL, offset)
+
 	log.Info("getting updates...")
-	response, err := call(url)
+	response, err := api.call("getUpdates", GetUpdates{offset, 5})
 	if err != nil {
-		fmt.Println(err)
+
 		return update
 	}
 	json.Unmarshal(response.Result, &update)
@@ -73,6 +86,7 @@ func NewAPI(conf Configuration) API {
 }
 
 // ProcessUpdates from the telegram api
+// Note: I don't like this here somehow.
 func (api *API) ProcessUpdates(out chan *Message) {
 	lastMessageID := 0
 	for {
@@ -85,4 +99,16 @@ func (api *API) ProcessUpdates(out chan *Message) {
 			out <- &element.Message
 		}
 	}
+}
+
+// SendMessage action
+func (api *API) SendMessage(message *SendMessage) (*Message, error) {
+	response, err := api.call("sendMessage", message)
+	if err != nil {
+		return nil, err
+	}
+	var msg Message
+
+	json.Unmarshal(response.Result, &msg)
+	return &msg, nil
 }

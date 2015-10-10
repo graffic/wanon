@@ -1,8 +1,6 @@
 package ignorechat
 
 import (
-	"fmt"
-
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
@@ -19,16 +17,16 @@ type IgnoreConfiguration struct {
 	Allow []int
 }
 
-func (handler *ignoreHandler) Check(message *telegram.Message) int {
+func (handler *ignoreHandler) Check(message *telegram.Message, context *bot.Context) int {
 	if handler.allowed[message.Chat.ID] {
-		fmt.Println("Accepted")
+		log.Debug("Accepted")
 		return bot.RouteNothing
 	}
-	fmt.Println("Ignored")
+	log.Debug("Ignored")
 	return bot.RouteStop
 }
 
-func (handler *ignoreHandler) Handle(message *telegram.Message) {}
+func (handler *ignoreHandler) Handle(message *telegram.Message, context *bot.Context) {}
 
 // Create creates the ignore handler
 func Create(conf *bot.ConfService) bot.Handler {

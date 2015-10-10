@@ -4,7 +4,8 @@ import (
 	"os"
 
 	"github.com/graffic/wanon/bot"
-	"github.com/graffic/wanon/messages"
+	"github.com/graffic/wanon/messages/ignorechat"
+	"github.com/graffic/wanon/messages/quotes"
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
@@ -20,8 +21,10 @@ func initLogging() {
 
 	// Set the backends to be used.
 	logging.SetBackend(formatter)
+	logging.SetLevel(logging.INFO, "wanon.telegram")
 }
 
+// checkFatal exits on fatal
 func checkFatal(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -29,37 +32,21 @@ func checkFatal(err error) {
 	}
 }
 
-func createAPI(conf *bot.ConfService) (*telegram.API, error) {
-	var apiConf telegram.Configuration
-	conf.Get(&apiConf)
-	api := telegram.NewAPI(apiConf)
-	result, err := api.GetMe()
-	if err != nil {
-		return nil, err
-	}
-	log.Info("%s online", result.Username)
-
-	return &api, nil
-}
-
 func main() {
 	initLogging()
 	log.Debug("Wanon booting")
 
-	conf, err := bot.LoadConf("conf.yaml")
+	context, err := bot.CreateContext("conf.yaml")
 	checkFatal(err)
-
-	_, err2 := bot.NewStorage(conf)
-	checkFatal(err2)
-
-	api, err3 := createAPI(conf)
-	checkFatal(err3)
 
 	log.Info("All systems nominal")
 
 	channel := make(chan *telegram.Message)
-	go api.ProcessUpdates(channel)
+	go context.API.ProcessUpdates(channel)
+
 	router := bot.Router{}
-	router.AddHandler(messages.CreateIgnore(conf))
-	router.RouteMessages(channel)
+	router.AddHandler(ignorechat.Create(context.Conf))
+	router.AddHandler(quotes.CreateAddQuote())
+	router.AddHandler(quotes.CreateRandomQuote())
+	router.RouteMessages(channel, context)
 }
