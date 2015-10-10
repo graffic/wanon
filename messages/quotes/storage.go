@@ -17,7 +17,7 @@ type quoteStorage struct {
 type Quote struct {
 	SaidBy  string
 	AddedBy string
-	When    string
+	When    int
 	What    string
 }
 
@@ -58,7 +58,6 @@ func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
 	}
 
 	amountToSkip := rand.Intn(count)
-
 	l.Debug("Entries: %d, Skip: %d", count, amountToSkip)
 
 	skip := fmt.Sprintf(`{"$skip": %d}`, amountToSkip)

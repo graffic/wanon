@@ -48,7 +48,7 @@ type Message struct {
 	ReplyToMessage *Message `json:"reply_to_message"`
 }
 
-// SendMessaction action parameter
+// SendMessage action parameter
 type SendMessage struct {
 	ChatID int    `json:"chat_id"`
 	Text   string `json:"text"`

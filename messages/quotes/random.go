@@ -28,6 +28,9 @@ func (handler *randomQuote) Handle(message *telegram.Message, context *bot.Conte
 		l.Debug("%s", err)
 		return
 	}
+	if quote == nil {
+		return
+	}
 
 	_, err = context.API.SendMessage(&telegram.SendMessage{
 		ChatID: message.Chat.ID,

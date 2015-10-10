@@ -28,6 +28,7 @@ func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context)
 	quote := Quote{
 		AddedBy: message.From.Username,
 		SaidBy:  message.ReplyToMessage.From.Username,
+		When:    message.Date,
 		What:    message.ReplyToMessage.Text,
 	}
 
@@ -35,6 +36,7 @@ func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context)
 	if err != nil {
 		l.Fatal(err)
 	}
+	l.Info("Quote Added: <%s> %s", quote.SaidBy, quote.What)
 }
 
 // CreateAddQuote does nothing
