@@ -50,8 +50,9 @@ type Message struct {
 
 // SendMessage action parameter
 type SendMessage struct {
-	ChatID int    `json:"chat_id"`
-	Text   string `json:"text"`
+	ChatID  int    `json:"chat_id"`
+	Text    string `json:"text"`
+	ReplyTo int    `json:"reply_to_message_id"`
 }
 
 // GetUpdates action parameter

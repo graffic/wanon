@@ -25,17 +25,18 @@ func (handler *randomQuote) Handle(message *telegram.Message, context *bot.Conte
 	quotes := quoteStorage{context.Storage}
 	quote, err := quotes.RQuote(message.Chat.ID)
 	if err != nil {
-		l.Debug("%s", err)
-		return
-	}
-	if quote == nil {
+		l.Error(fmt.Sprint(err))
 		return
 	}
 
-	_, err = context.API.SendMessage(&telegram.SendMessage{
-		ChatID: message.Chat.ID,
-		Text:   fmt.Sprintf("<%s> %s", quote.SaidBy, quote.What),
-	})
+	answer := telegram.AnswerBack{API: context.API, Message: message}
+
+	if quote == nil {
+		_, err = answer.Reply("I'm empty! Add quotes to me")
+	} else {
+		_, err = answer.Send(fmt.Sprintf("<%s> %s", quote.SaidBy, quote.What))
+	}
+
 	if err != nil {
 		l.Error(fmt.Sprint(err))
 	}

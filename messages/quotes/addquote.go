@@ -16,11 +16,19 @@ func (handler *addQuote) Check(message *telegram.Message, context *bot.Context) 
 	isAddQuote := strings.Index(message.Text, "/addquote") == 0
 	isReply := message.ReplyToMessage != nil
 
-	if isAddQuote && isReply {
-		l.Info("Adding quote")
-		return bot.RouteAccept
+	if !isAddQuote {
+		return bot.RouteNothing
 	}
-	return bot.RouteNothing
+
+	if !isReply {
+		answer := telegram.AnswerBack{API: context.API, Message: message}
+		answer.Reply("To add a quote use /addquote in a reply")
+
+		return bot.RouteNothing
+	}
+
+	l.Info("Adding quote")
+	return bot.RouteAccept
 }
 
 func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context) {
