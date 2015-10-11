@@ -45,6 +45,8 @@ func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context)
 		l.Fatal(err)
 	}
 	l.Info("Quote Added: <%s> %s", quote.SaidBy, quote.What)
+	answer := telegram.AnswerBack{API: context.API, Message: message}
+	answer.Reply("procesado correctamente, siguienteeeeeee!!!!")
 }
 
 // CreateAddQuote does nothing
