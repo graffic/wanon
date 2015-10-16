@@ -2,7 +2,7 @@ package telegram
 
 // AnswerBack message helper to answer messages
 type AnswerBack struct {
-	*API
+	API
 	*Message
 }
 

@@ -1,10 +1,7 @@
 package telegram
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 
 	"github.com/op/go-logging"
@@ -12,9 +9,9 @@ import (
 
 var log = logging.MustGetLogger("wanon.telegram")
 
-// API holds the API configuration and methods
-type API struct {
-	baseURL string
+// apiImpl holds the API configuration and methods
+type apiImpl struct {
+	Request
 }
 
 // Configuration settings
@@ -22,39 +19,18 @@ type Configuration struct {
 	Token string
 }
 
-func (api *API) call(method string, in interface{}) (*Response, error) {
-	url := fmt.Sprintf("%s%s", api.baseURL, method)
-	var response *http.Response
-	var err error
-
-	if in == nil {
-		response, err = http.Get(url)
-	} else {
-		outData, err := json.Marshal(in)
-		if err != nil {
-			return nil, err
-		}
-		log.Debug("Request: " + string(outData))
-		response, err = http.Post(url, "application/json", bytes.NewBuffer(outData))
-	}
-	if err != nil {
-		return nil, err
-	}
-
-	defer response.Body.Close()
-	bytes, err := ioutil.ReadAll(response.Body)
-	log.Debug("Response: " + string(bytes))
-
-	var out Response
-	json.Unmarshal(bytes, &out)
-
-	return &out, nil
+// API holds the API methods
+type API interface {
+	GetMe() (User, error)
+	GetUpdates(int) []Update
+	ProcessUpdates(chan *Message)
+	SendMessage(*SendMessage) (*Message, error)
 }
 
 // GetMe checks the token validity
-func (api *API) GetMe() (User, error) {
+func (api *apiImpl) GetMe() (User, error) {
 	var user User
-	response, err := api.call("getMe", nil)
+	response, err := api.Call("getMe", nil)
 
 	if err != nil {
 		return user, err
@@ -65,11 +41,11 @@ func (api *API) GetMe() (User, error) {
 }
 
 // GetUpdates from telegram
-func (api *API) GetUpdates(offset int) []Update {
+func (api *apiImpl) GetUpdates(offset int) []Update {
 	var update []Update
 
 	log.Info("getting updates...")
-	response, err := api.call("getUpdates", GetUpdates{offset, 5})
+	response, err := api.Call("getUpdates", GetUpdates{offset, 5})
 	if err != nil {
 
 		return update
@@ -82,12 +58,12 @@ func (api *API) GetUpdates(offset int) []Update {
 // NewAPI creates a new api from a token
 func NewAPI(conf Configuration) API {
 	baseURL := "https://api.telegram.org/bot" + conf.Token + "/"
-	return API{baseURL}
+	return &apiImpl{NewRequest(&http.Client{}, baseURL)}
 }
 
 // ProcessUpdates from the telegram api
 // Note: I don't like this here somehow.
-func (api *API) ProcessUpdates(out chan *Message) {
+func (api *apiImpl) ProcessUpdates(out chan *Message) {
 	lastMessageID := 0
 	for {
 		update := api.GetUpdates(lastMessageID)
@@ -102,8 +78,8 @@ func (api *API) ProcessUpdates(out chan *Message) {
 }
 
 // SendMessage action
-func (api *API) SendMessage(message *SendMessage) (*Message, error) {
-	response, err := api.call("sendMessage", message)
+func (api *apiImpl) SendMessage(message *SendMessage) (*Message, error) {
+	response, err := api.Call("sendMessage", message)
 	if err != nil {
 		return nil, err
 	}

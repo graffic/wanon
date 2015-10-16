@@ -11,10 +11,10 @@ var log = logging.MustGetLogger("wanon.bot")
 type Context struct {
 	Storage *Storage
 	Conf    *ConfService
-	API     *telegram.API
+	API     telegram.API
 }
 
-func createAPI(conf *ConfService) (*telegram.API, error) {
+func createAPI(conf *ConfService) (telegram.API, error) {
 	var apiConf telegram.Configuration
 	conf.Get(&apiConf)
 	api := telegram.NewAPI(apiConf)
@@ -24,7 +24,7 @@ func createAPI(conf *ConfService) (*telegram.API, error) {
 	}
 	log.Info("%s online", result.Username)
 
-	return &api, nil
+	return api, nil
 }
 
 // CreateContext creates a bot context from a configuration file
