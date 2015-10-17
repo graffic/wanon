@@ -55,7 +55,10 @@ func (req *requestImpl) Call(method string, in interface{}) (*Response, error) {
 	log.Debug("Response: " + string(bytes))
 
 	var out Response
-	json.Unmarshal(bytes, &out)
+	err = json.Unmarshal(bytes, &out)
+	if err != nil {
+		return nil, err
+	}
 
 	return &out, nil
 }
