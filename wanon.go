@@ -49,9 +49,9 @@ func sigQuit() {
 }
 
 func main() {
-	sigQuit()
 	initLogging()
 	log.Debug("Wanon booting")
+	sigQuit()
 
 	context, err := bot.CreateContext("conf.yaml")
 	checkFatal(err)
