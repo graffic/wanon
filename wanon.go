@@ -49,6 +49,7 @@ func sigQuit() {
 }
 
 func main() {
+	sigQuit()
 	initLogging()
 	log.Debug("Wanon booting")
 
