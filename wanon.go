@@ -2,6 +2,9 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"runtime"
+	"syscall"
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages/ignorechat"
@@ -30,6 +33,19 @@ func checkFatal(err error) {
 		log.Fatal(err)
 		os.Exit(1)
 	}
+}
+
+func sigQuit() {
+	go func() {
+		sigs := make(chan os.Signal, 1)
+		signal.Notify(sigs, syscall.SIGQUIT)
+		buf := make([]byte, 1<<20)
+		for {
+			<-sigs
+			runtime.Stack(buf, true)
+			log.Warning("=== received SIGQUIT ===\n*** goroutine dump...\n%s\n*** end\n", buf)
+		}
+	}()
 }
 
 func main() {

@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
@@ -17,7 +20,7 @@ type Context struct {
 func createAPI(conf *ConfService) (telegram.API, error) {
 	var apiConf telegram.Configuration
 	conf.Get(&apiConf)
-	api := telegram.NewAPI(apiConf)
+	api := telegram.NewAPI(&http.Client{Timeout: time.Second * 15}, apiConf)
 	result, err := api.GetMe()
 	if err != nil {
 		return nil, err

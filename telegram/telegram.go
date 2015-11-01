@@ -2,7 +2,6 @@ package telegram
 
 import (
 	"encoding/json"
-	"net/http"
 
 	"github.com/op/go-logging"
 )
@@ -47,7 +46,6 @@ func (api *apiImpl) GetUpdates(offset int) []Update {
 	log.Info("getting updates...")
 	response, err := api.Call("getUpdates", GetUpdates{offset, 5})
 	if err != nil {
-
 		return update
 	}
 	json.Unmarshal(response.Result, &update)
@@ -56,9 +54,9 @@ func (api *apiImpl) GetUpdates(offset int) []Update {
 }
 
 // NewAPI creates a new api from a token
-func NewAPI(conf Configuration) API {
+func NewAPI(httpClient HTTPClient, conf Configuration) API {
 	baseURL := "https://api.telegram.org/bot" + conf.Token + "/"
-	return &apiImpl{NewRequest(&http.Client{}, baseURL)}
+	return &apiImpl{NewRequest(httpClient, baseURL)}
 }
 
 // ProcessUpdates from the telegram api
