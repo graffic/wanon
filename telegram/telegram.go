@@ -43,7 +43,7 @@ func (api *apiImpl) GetMe() (User, error) {
 func (api *apiImpl) GetUpdates(offset int) []Update {
 	var update []Update
 
-	log.Info("getting updates...")
+	log.Debug("getting updates...")
 	response, err := api.Call("getUpdates", GetUpdates{offset, 5})
 	if err != nil {
 		return update

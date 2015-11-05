@@ -50,6 +50,20 @@ func (req *requestImpl) Call(method string, in interface{}) (*Response, error) {
 		return nil, err
 	}
 
+	if response == nil {
+		log.Error("Response is nil")
+		log.Fatal(err)
+
+		return nil, err
+	}
+
+	if response.Body == nil {
+		log.Error("Body is nil")
+		log.Fatal(err)
+
+		return nil, err
+	}
+
 	defer response.Body.Close()
 	bytes, err := ioutil.ReadAll(response.Body)
 	log.Debug("Response: " + string(bytes))
