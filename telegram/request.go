@@ -37,29 +37,25 @@ func (req *requestImpl) Call(method string, in interface{}) (*Response, error) {
 	var err error
 
 	if in == nil {
-		response, err = req.client.Get(url)
+		if response, err = req.client.Get(url); err != nil {
+			return nil, err
+		}
 	} else {
 		outData, err := json.Marshal(in)
 		if err != nil {
 			return nil, err
 		}
 		log.Debug("Request: " + string(outData))
-		response, err = req.client.Post(url, "application/json", bytes.NewBuffer(outData))
-	}
-	if err != nil {
-		return nil, err
+
+		postData := bytes.NewBuffer(outData)
+		mime := "application/json"
+		if response, err = req.client.Post(url, mime, postData); err != nil {
+			return nil, err
+		}
 	}
 
 	if response == nil {
-		log.Error("Response is nil")
-		log.Fatal(err)
-
-		return nil, err
-	}
-
-	if response.Body == nil {
-		log.Error("Body is nil")
-		log.Fatal(err)
+		log.Warning("Res: %v Err: %v Url: %v Data: %v", response, err, url, in)
 
 		return nil, err
 	}
