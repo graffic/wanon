@@ -8,12 +8,15 @@ type StorageConfiguration struct {
 }
 
 // Storage for quotes
-type Storage struct {
-	DB *goejdb.Ejdb
+type Storage interface {
+	CreateColl(colname string, opts *goejdb.EjCollOpts) (*goejdb.EjColl, *goejdb.EjdbError)
+	CreateQuery(query string, queries ...string) (*goejdb.EjQuery, *goejdb.EjdbError)
+	GetColl(colname string) (*goejdb.EjColl, *goejdb.EjdbError)
+	Meta() ([]byte, *goejdb.EjdbError)
 }
 
 // NewStorage creates a new storage
-func NewStorage(conf *ConfService) (*Storage, error) {
+func NewStorage(conf *ConfService) (Storage, error) {
 	var storageConf StorageConfiguration
 	conf.Get(&storageConf)
 
@@ -23,5 +26,5 @@ func NewStorage(conf *ConfService) (*Storage, error) {
 		return nil, err
 	}
 
-	return &Storage{db}, nil
+	return db, nil
 }

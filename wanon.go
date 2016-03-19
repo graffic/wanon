@@ -8,6 +8,7 @@ import (
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages/ignorechat"
+	"github.com/graffic/wanon/messages/manage"
 	"github.com/graffic/wanon/messages/quotes"
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
@@ -65,5 +66,6 @@ func main() {
 	router.AddHandler(ignorechat.Create(context.Conf))
 	router.AddHandler(quotes.CreateAddQuote())
 	router.AddHandler(quotes.CreateRandomQuote())
+	router.AddHandler(manage.Create(context.Conf))
 	router.RouteMessages(channel, context)
 }

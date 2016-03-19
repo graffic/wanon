@@ -10,11 +10,12 @@ import (
 )
 
 type quoteStorage struct {
-	*bot.Storage
+	bot.Storage
 }
 
 // Quote what a quote contains
 type Quote struct {
+	ID      bson.ObjectId `bson:"_id,omitempty"`
 	SaidBy  string
 	AddedBy string
 	When    int
@@ -23,7 +24,7 @@ type Quote struct {
 
 // AddQuote to the storage
 func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
-	col, err1 := storage.DB.CreateColl(strconv.Itoa(chat), nil)
+	col, err1 := storage.CreateColl(strconv.Itoa(chat), nil)
 	if err1 != nil {
 		return err1
 	}
@@ -43,7 +44,7 @@ func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
 
 // RQuote get a random quote - ToDo
 func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
-	col, err := storage.DB.CreateColl(strconv.Itoa(chat), nil)
+	col, err := storage.CreateColl(strconv.Itoa(chat), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
 	l.Debug("Entries: %d, Skip: %d", count, amountToSkip)
 
 	skip := fmt.Sprintf(`{"$skip": %d}`, amountToSkip)
-	query, err := storage.DB.CreateQuery("{}")
+	query, err := storage.CreateQuery("{}")
 	defer query.Del()
 	if err != nil {
 		return nil, err

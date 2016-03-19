@@ -12,7 +12,7 @@ var log = logging.MustGetLogger("wanon.bot")
 
 // Context bot context
 type Context struct {
-	Storage *Storage
+	Storage Storage
 	Conf    *ConfService
 	API     telegram.API
 }
