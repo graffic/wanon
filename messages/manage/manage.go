@@ -118,7 +118,7 @@ func help() {
 func Create(conf *bot.ConfService) bot.Handler {
 	myConf := new(configuration)
 	conf.Get(myConf)
-	log.Notice("Manage only from: %d", myConf.Admins)
+	log.Notice("Manage only from: %v", myConf.Admins)
 
 	allowed := make(map[int]bool)
 	for _, chatID := range myConf.Admins {

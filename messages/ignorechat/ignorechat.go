@@ -34,7 +34,7 @@ func (handler *ignoreHandler) Handle(message *telegram.Message, context *bot.Con
 func Create(conf *bot.ConfService) bot.Handler {
 	myConf := new(configuration)
 	conf.Get(myConf)
-	log.Notice("Allowing only from: %d", myConf.Allow)
+	log.Notice("Allowing only from: %v", myConf.Allow)
 
 	allowed := make(map[int]bool)
 	for _, chatID := range myConf.Allow {
