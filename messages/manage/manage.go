@@ -31,7 +31,9 @@ func (handler *handler) Check(message *telegram.Message, context *bot.Context) i
 		log.Debug("Accepted")
 		return bot.RouteAccept
 	}
-	log.Debug("Ignored")
+	if isManage {
+		log.Debug(fmt.Sprintf("Not allowed: %d", message.Chat.ID))
+	}
 	return bot.RouteStop
 }
 
