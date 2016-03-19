@@ -32,7 +32,7 @@ func (handler *handler) Check(message *telegram.Message, context *bot.Context) i
 		return bot.RouteAccept
 	}
 	if isManage {
-		log.Debug(fmt.Sprintf("Not allowed: %d", message.Chat.ID))
+		log.Debug("Not allowed: %d", message.Chat.ID)
 	}
 	return bot.RouteStop
 }
@@ -61,18 +61,21 @@ func (actions *manager) list(text string) {
 	skip := 0
 
 	if amount < 3 {
+		actions.answer.Reply("You forgot the chat id")
 		return
 	}
 	if amount == 4 {
 		skip, _ = strconv.Atoi(items[3])
 	}
 
+	log.Debug("List quotes on %d skip: %d", items[2], skip)
 	quotes, _ := actions.storage.List(items[2], skip)
 	var result string
 	for _, quote := range *quotes {
 		quoteStr := fmt.Sprintf("%s: <%s> %s\n", quote.ID.Hex(), quote.SaidBy, quote.What)
 		result += quoteStr
 	}
+	log.Debug(result)
 	actions.answer.Reply(result)
 }
 
