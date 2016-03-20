@@ -54,7 +54,7 @@ func (storage *managerStorage) List(chat string, amountToSkip int) (*[]quotes.Qu
 	if err != nil {
 		return nil, err
 	}
-	hint := fmt.Sprintf(`{"$orderby":{"when":1}, "$skip": %d}`, amountToSkip)
+	hint := fmt.Sprintf(`{"$orderby":{"when":1}, "$skip": %d, "$limit": 10}`, amountToSkip)
 	query.SetHints(hint)
 
 	results, err := query.Execute(col)
