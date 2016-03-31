@@ -29,10 +29,10 @@ func TestChats(t *testing.T) {
 
 	names, _ := manager.Chats()
 
-	assert.Equal(t, []string{"12345"}, names)
+	assert.Equal(t, &metadata.Collections, names)
 }
 
-func TestIntegrationList(t *testing.T) {
+func TestIntegrationList_Sorting(t *testing.T) {
 	storage, err := goejdb.Open("TestIntegrationList", goejdb.JBOWRITER|goejdb.JBOCREAT)
 	if err != nil {
 		t.Error(err)
@@ -57,5 +57,35 @@ func TestIntegrationList(t *testing.T) {
 	if err2 != nil {
 		t.Error(err2)
 	}
-	assert.Equal(t, &[]quotes.Quote{quotes.Quote{When: 11}}, res)
+
+	assert.Equal(t, 11, (*res)[0].When)
+}
+
+func TestIntegrationList_Pagination(t *testing.T) {
+	storage, err := goejdb.Open("TestIntegrationList", goejdb.JBOWRITER|goejdb.JBOCREAT)
+	if err != nil {
+		t.Error(err)
+	}
+	defer storage.Del()
+	defer os.Remove("TestIntegrationList")
+
+	chatColl, err := storage.CreateColl("12345", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.Remove("TestIntegrationList_12345")
+
+	for i := 25; i > 0; i-- {
+		bsonBytes, _ := bson.Marshal(quotes.Quote{When: i})
+		chatColl.SaveBson(bsonBytes)
+	}
+
+	manager := managerStorage{db: storage}
+
+	res, err2 := manager.List("12345", 10)
+	if err2 != nil {
+		t.Error(err2)
+	}
+
+	assert.Equal(t, 10, len(*res))
 }

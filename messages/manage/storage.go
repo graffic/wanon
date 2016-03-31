@@ -35,6 +35,7 @@ func (storage *managerStorage) Chats() (*[]collectionMetadata, error) {
 	return &metadata.Collections, nil
 }
 
+// Delete a quote form the specific channel
 func (storage *managerStorage) Delete(chat string, oid string) error {
 	coll, err := storage.db.GetColl(chat)
 	if err != nil {
@@ -54,7 +55,7 @@ func (storage *managerStorage) List(chat string, amountToSkip int) (*[]quotes.Qu
 	if err != nil {
 		return nil, err
 	}
-	hint := fmt.Sprintf(`{"$orderby":{"when":1}, "$skip": %d, "$limit": 10}`, amountToSkip)
+	hint := fmt.Sprintf(`{"$orderby":{"when":1}, "$skip": %d, "$max": 10}`, amountToSkip)
 	query.SetHints(hint)
 
 	results, err := query.Execute(col)
