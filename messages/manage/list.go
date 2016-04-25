@@ -27,16 +27,16 @@ func (handler *listHandler) Handle(message *bot.Message) {
 	amount := len(items)
 	skip := 0
 
-	if amount < 3 {
+	if amount < 2 {
 		message.Reply("You forgot the chat id")
 		return
 	}
-	if amount == 4 {
-		skip, _ = strconv.Atoi(items[3])
+	if amount == 3 {
+		skip, _ = strconv.Atoi(items[2])
 	}
 
-	log.Debug("List quotes on %d skip: %d", items[2], skip)
-	quotes, _ := handler.storage.List(items[2], skip)
+	log.Debug("List quotes on %d skip: %d", items[1], skip)
+	quotes, _ := handler.storage.List(items[1], skip)
 	var result string
 	for _, quote := range *quotes {
 		quoteStr := fmt.Sprintf("%s: <%s> %s\n", quote.ID.Hex(), quote.SaidBy, quote.What)
