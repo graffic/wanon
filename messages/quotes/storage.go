@@ -59,7 +59,7 @@ func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
 	}
 
 	amountToSkip := rand.Intn(count)
-	l.Debug("Entries: %d, Skip: %d", count, amountToSkip)
+	log.Debug("Entries: %d, Skip: %d", count, amountToSkip)
 
 	skip := fmt.Sprintf(`{"$skip": %d}`, amountToSkip)
 	query, err := storage.CreateQuery("{}")

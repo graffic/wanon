@@ -1,38 +1,30 @@
 package quotes
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/graffic/wanon/bot"
-	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
 
-type addQuote struct{}
-
-var l = logging.MustGetLogger("wanon.messages.quotes")
-
-func (handler *addQuote) Check(message *telegram.Message, context *bot.Context) int {
-	isAddQuote := strings.Index(message.Text, "/addquote") == 0
-	isReply := message.ReplyToMessage != nil
-
-	if !isAddQuote {
-		return bot.RouteNothing
-	}
-
-	if !isReply {
-		answer := telegram.AnswerBack{API: context.API, Message: message}
-		answer.Reply("To add a quote use /addquote in a reply")
-
-		return bot.RouteNothing
-	}
-
-	l.Info("Adding quote")
-	return bot.RouteAccept
+type addQuote struct {
+	quoteHandler
 }
 
-func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context) {
-	quotes := quoteStorage{context.Storage}
+var log = logging.MustGetLogger("wanon.messages.quotes")
+
+func (handler *addQuote) Check(message *bot.Message) int {
+	res := handler.check("/addquote", message)
+
+	if res == bot.RouteAccept && message.ReplyToMessage == nil {
+		message.Reply("To add a quote use /addquote in a reply")
+		res = bot.RouteStop
+	}
+
+	return res
+}
+
+func (handler *addQuote) Handle(message *bot.Message) {
 	quote := Quote{
 		AddedBy: message.From.Username,
 		SaidBy:  message.ReplyToMessage.From.Username,
@@ -40,16 +32,17 @@ func (handler *addQuote) Handle(message *telegram.Message, context *bot.Context)
 		What:    message.ReplyToMessage.Text,
 	}
 
-	err := quotes.AddQuote(message.Chat.ID, &quote)
+	err := handler.storage.AddQuote(message.Chat.ID, &quote)
 	if err != nil {
-		l.Fatal(err)
+		log.Fatal(err)
 	}
-	l.Info("Quote Added: <%s> %s", quote.SaidBy, quote.What)
-	answer := telegram.AnswerBack{API: context.API, Message: message}
-	answer.Reply("procesado correctamente, siguienteeeeeee!!!!")
+
+	quoteRendered := fmt.Sprintf("<%s> %s", quote.SaidBy, quote.What)
+	log.Info("Quote Added: " + quoteRendered)
+	message.Send(quoteRendered + "\nprocesado correctamente, siguienteeeeeee!!!!")
 }
 
 // CreateAddQuote does nothing
-func CreateAddQuote() bot.Handler {
-	return new(addQuote)
+func CreateAddQuote(context *bot.Context) bot.Handler {
+	return &addQuote{createQuoteHandler(context)}
 }

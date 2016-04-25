@@ -7,7 +7,6 @@ import (
 	"syscall"
 
 	"github.com/graffic/wanon/bot"
-	"github.com/graffic/wanon/messages/ignorechat"
 	"github.com/graffic/wanon/messages/manage"
 	"github.com/graffic/wanon/messages/quotes"
 	"github.com/graffic/wanon/telegram"
@@ -63,9 +62,9 @@ func main() {
 	go context.API.ProcessUpdates(channel)
 
 	router := bot.Router{}
-	router.AddHandler(ignorechat.Create(context.Conf))
-	router.AddHandler(quotes.CreateAddQuote())
-	router.AddHandler(quotes.CreateRandomQuote())
-	router.AddHandler(manage.Create(context.Conf))
+
+	quotes.Setup(&router, context)
+	manage.Setup(&router, context)
+
 	router.RouteMessages(channel, context)
 }

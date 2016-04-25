@@ -5,12 +5,11 @@ import (
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages/quotes"
-
 	"labix.org/v2/mgo/bson"
 )
 
-type managerStorage struct {
-	db bot.Storage
+type manageStorage struct {
+	bot.Storage
 }
 
 type ejdbMetadata struct {
@@ -23,8 +22,38 @@ type collectionMetadata struct {
 	Records int    `bson:"records"`
 }
 
-func (storage *managerStorage) Chats() (*[]collectionMetadata, error) {
-	bsonData, err := storage.db.Meta()
+func (storage *manageStorage) Move(from string, to string) (int, error) {
+	fromCol, err := storage.GetColl(from)
+	if err != nil {
+		return 0, err
+	}
+
+	toCol, err := storage.GetColl(to)
+	if err != nil {
+		return 0, err
+	}
+
+	amount, err := fromCol.Count("{}")
+	if err != nil {
+		return 0, err
+	}
+
+	quotes, err := fromCol.Find("{}")
+	if err != nil {
+		return 0, err
+	}
+
+	for _, quote := range quotes {
+		toCol.SaveBson(quote)
+	}
+
+	storage.RmColl(from, true)
+
+	return amount, nil
+}
+
+func (storage *manageStorage) Chats() (*[]collectionMetadata, error) {
+	bsonData, err := storage.Meta()
 	if err != nil {
 		return nil, err
 	}
@@ -36,8 +65,8 @@ func (storage *managerStorage) Chats() (*[]collectionMetadata, error) {
 }
 
 // Delete a quote form the specific channel
-func (storage *managerStorage) Delete(chat string, oid string) error {
-	coll, err := storage.db.GetColl(chat)
+func (storage *manageStorage) Delete(chat string, oid string) error {
+	coll, err := storage.GetColl(chat)
 	if err != nil {
 		return err
 	}
@@ -45,12 +74,12 @@ func (storage *managerStorage) Delete(chat string, oid string) error {
 	return nil
 }
 
-func (storage *managerStorage) List(chat string, amountToSkip int) (*[]quotes.Quote, error) {
-	col, err := storage.db.GetColl(chat)
+func (storage *manageStorage) List(chat string, amountToSkip int) (*[]quotes.Quote, error) {
+	col, err := storage.GetColl(chat)
 	if err != nil {
 		return nil, err
 	}
-	query, err := storage.db.CreateQuery("{}")
+	query, err := storage.CreateQuery("{}")
 	defer query.Del()
 	if err != nil {
 		return nil, err

@@ -1,6 +1,6 @@
 package bot
 
-import "github.com/mkilling/goejdb"
+import "github.com/graffic/goejdb"
 
 // StorageConfiguration configuration
 type StorageConfiguration struct {
@@ -13,6 +13,8 @@ type Storage interface {
 	CreateQuery(query string, queries ...string) (*goejdb.EjQuery, *goejdb.EjdbError)
 	GetColl(colname string) (*goejdb.EjColl, *goejdb.EjdbError)
 	Meta() ([]byte, *goejdb.EjdbError)
+	RmColl(colname string, unlinkfile bool) (bool, *goejdb.EjdbError)
+	Sync() (bool, *goejdb.EjdbError)
 }
 
 // NewStorage creates a new storage
