@@ -1,8 +1,6 @@
 package bot
 
-import (
-	"github.com/graffic/wanon/telegram"
-)
+import "github.com/graffic/wanon/telegram"
 
 // RouteNothing do nothing in handling
 const RouteNothing = 0
@@ -13,10 +11,16 @@ const (
 	RouteStop
 )
 
+// Message from the telegram router
+type Message struct {
+	*telegram.Message
+	*telegram.AnswerBack
+}
+
 // Handler pairs a check and a handle function
 type Handler interface {
-	Check(*telegram.Message, *Context) int
-	Handle(*telegram.Message, *Context)
+	Check(messages *Message) int
+	Handle(messages *Message)
 }
 
 // Router stores handlers for messages
@@ -33,11 +37,14 @@ func (router *Router) AddHandler(handler Handler) {
 func (router *Router) RouteMessages(messages chan *telegram.Message, context *Context) {
 	for {
 		message := <-messages
+		answer := telegram.AnswerBack{API: context.API, Message: message}
+		routerMessage := Message{message, &answer}
 
 		for _, handler := range router.handles {
-			result := handler.Check(message, context)
+
+			result := handler.Check(&routerMessage)
 			if (result & RouteAccept) > 0 {
-				handler.Handle(message, context)
+				handler.Handle(&routerMessage)
 			}
 			if (result & RouteStop) > 0 {
 				break
