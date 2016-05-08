@@ -55,19 +55,19 @@ func allNotCalled(t *testing.T, handlers []testHandler) {
 	}
 }
 
-func setupRouter() (*Router, *aloneHandler, *oneHandler, *twoHandler) {
-	router := new(Router)
+func setupRouter() (*Routes, *aloneHandler, *oneHandler, *twoHandler) {
+	routes := new(Routes)
 
 	alone := new(aloneHandler)
-	router.AddHandler("/potato", alone)
+	routes.AddHandler("/potato", alone)
 
 	one := new(oneHandler)
-	router.AddHandler("/potato :paramOne", one)
+	routes.AddHandler("/potato :paramOne", one)
 
 	two := new(twoHandler)
-	router.AddHandler("/potato :paramOne :paramTwo", two)
+	routes.AddHandler("/potato :paramOne :paramTwo", two)
 
-	return router, alone, one, two
+	return routes, alone, one, two
 }
 
 func checkExecutions(t *testing.T, done int) {
@@ -116,8 +116,4 @@ func TestTwo(t *testing.T) {
 	if two.Two != "two" {
 		t.Error("Two parameter is not correct", two.Two)
 	}
-}
-
-func TestMainLoop(t *testing.T) {
-
 }

@@ -62,6 +62,5 @@ func main() {
 
 	router := &bot.Routes{}
 	messages.Setup(router, context)
-
 	bot.MainLoop(channel, router)
 }

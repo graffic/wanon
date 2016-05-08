@@ -86,16 +86,3 @@ func (router *Routes) Route(message *telegram.Message) {
 		}
 	}
 }
-
-// Router routes messages
-type Router interface {
-	Route(message *telegram.Message)
-}
-
-// MainLoop of the bot to get messages and route them
-func MainLoop(channel chan *telegram.Message, router Router) {
-	for {
-		message := <-channel
-		router.Route(message)
-	}
-}
