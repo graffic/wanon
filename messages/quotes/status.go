@@ -15,7 +15,7 @@ func (handler *quoteStatus) Handle(context *bot.MessageContext) {
 	message := context.Message
 	amount := 0
 
-	col, err := handler.storage.GetColl(strconv.Itoa(message.Chat.ID))
+	col, err := handler.storage.ejdb.GetColl(strconv.Itoa(message.Chat.ID))
 	if err != nil && err.ErrorCode != 9000 {
 		logger.Errorf("%v", err)
 		return

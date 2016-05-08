@@ -42,6 +42,6 @@ func (handler *addQuote) Handle(context *bot.MessageContext) {
 }
 
 // CreateAddQuote does nothing
-func CreateAddQuote(context *bot.BotContext) bot.Handler {
+func CreateAddQuote(context *bot.Context) bot.Handler {
 	return &addQuote{createQuoteHandler(context)}
 }

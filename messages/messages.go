@@ -12,7 +12,7 @@ type Handlers interface {
 }
 
 // Setup bot messages
-func Setup(handlers Handlers, context *bot.BotContext) {
+func Setup(handlers Handlers, context *bot.Context) {
 	quotes.Setup(handlers, context)
 	manage.Setup(handlers, context)
 }

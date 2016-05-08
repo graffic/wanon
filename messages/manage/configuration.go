@@ -25,7 +25,7 @@ func (handler *manageHandler) Check(context *bot.MessageContext) int {
 	return bot.RouteStop
 }
 
-func createManageHandler(context *bot.BotContext) *manageHandler {
+func createManageHandler(context *bot.Context) *manageHandler {
 	myConf := new(configuration)
 	context.Conf.Get(myConf)
 	logger.Notice("Manage only from: %v", myConf.Admins)
@@ -44,7 +44,7 @@ type Handlers interface {
 }
 
 // Setup the manage commands
-func Setup(handlers Handlers, context *bot.BotContext) {
+func Setup(handlers Handlers, context *bot.Context) {
 	handler := createManageHandler(context)
 	storage := &manageStorage{context.Storage}
 

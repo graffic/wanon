@@ -29,7 +29,7 @@ type Handler interface {
 
 // Routes stores handlers for messages
 type Routes struct {
-	Bot      BotContext
+	Bot      Context
 	handlers []handler
 }
 

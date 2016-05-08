@@ -52,7 +52,7 @@ func main() {
 	log.Debug("Wanon booting")
 	sigQuit()
 
-	context, err := bot.CreateBotContext("conf.yaml")
+	context, err := bot.CreateContext("conf.yaml")
 	checkFatal(err)
 
 	log.Info("All systems nominal")

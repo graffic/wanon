@@ -11,26 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestChats Return only collection with name as integer
-func TestChats(t *testing.T) {
-	var storage MockStorage
-	manager := manageStorage{&storage}
-
-	metadata := ejdbMetadata{
-		"file",
-		[]collectionMetadata{
-			collectionMetadata{"test1", 1},
-			collectionMetadata{"12345", 2},
-		},
-	}
-	bsonBytes, _ := bson.Marshal(metadata)
-	storage.Mock.On("Meta").Return(bsonBytes, nil)
-
-	names, _ := manager.Chats()
-
-	assert.Equal(t, &metadata.Collections, names)
-}
-
 func TestIntegrationList_Sorting(t *testing.T) {
 	storage, err := goejdb.Open("TestIntegrationList", goejdb.JBOWRITER|goejdb.JBOCREAT)
 	if err != nil {

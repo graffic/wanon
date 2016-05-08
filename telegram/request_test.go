@@ -23,14 +23,14 @@ func (closer *MockCloser) Close() error {
 // Normal get request where everything goes ok
 type TestCallGetOkSuite struct {
 	suite.Suite
-	client  MockHTTPClient
+	client  *MockHTTPClient
 	body    MockCloser
 	request Request
 }
 
 func (suite *TestCallGetOkSuite) SetupTest() {
-	suite.client = MockHTTPClient{}
-	suite.request = NewRequest(&suite.client, "http://telegram/")
+	suite.client = &MockHTTPClient{}
+	suite.request = NewRequest(suite.client, "http://telegram/")
 
 	contents := strings.NewReader("{\"ok\": true, \"result\": 4}")
 	suite.body = MockCloser{contents, false}
@@ -66,14 +66,14 @@ func TestCall_Get(t *testing.T) {
 // Error in http.Get
 type TestCallGetError struct {
 	suite.Suite
-	client  MockHTTPClient
+	client  *MockHTTPClient
 	request Request
 	err     error
 }
 
 func (suite *TestCallGetError) SetupTest() {
-	client := MockHTTPClient{}
-	suite.request = NewRequest(&suite.client, "http://telegram/")
+	client := &MockHTTPClient{}
+	suite.request = NewRequest(client, "http://telegram/")
 
 	suite.err = errors.New("404")
 	client.Mock.On("Get", "http://telegram/potato").Return(nil, suite.err)
@@ -103,14 +103,14 @@ func TestCall_GetError(t *testing.T) {
 // Error deserializing
 type TestCallGetUnmarshalError struct {
 	suite.Suite
-	client  MockHTTPClient
+	client  *MockHTTPClient
 	body    MockCloser
 	request Request
 }
 
 func (suite *TestCallGetUnmarshalError) SetupTest() {
-	suite.client = MockHTTPClient{}
-	suite.request = NewRequest(&suite.client, "http://telegram/")
+	suite.client = &MockHTTPClient{}
+	suite.request = NewRequest(suite.client, "http://telegram/")
 
 	contents := strings.NewReader("-- WRONG JSON --")
 	suite.body = MockCloser{contents, false}

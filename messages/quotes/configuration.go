@@ -28,7 +28,7 @@ func (handler *quoteHandler) Check(context *bot.MessageContext) int {
 	return bot.RouteStop
 }
 
-func createQuoteHandler(context *bot.BotContext) quoteHandler {
+func createQuoteHandler(context *bot.Context) quoteHandler {
 	myConf := new(configuration)
 	context.Conf.Get(myConf)
 	logger.Notice("Allowing quotes only from: %v", myConf.Allow)
@@ -47,7 +47,7 @@ type Handlers interface {
 }
 
 // Setup adds the quote handlers to the router
-func Setup(handlers Handlers, context *bot.BotContext) {
+func Setup(handlers Handlers, context *bot.Context) {
 	handler := createQuoteHandler(context)
 
 	handlers.AddHandler("/addQuote", &addQuote{handler})

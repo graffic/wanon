@@ -3,13 +3,13 @@ package manage
 import (
 	"fmt"
 
-	"github.com/graffic/wanon/bot"
+	"github.com/graffic/goejdb"
 	"github.com/graffic/wanon/messages/quotes"
 	"labix.org/v2/mgo/bson"
 )
 
 type manageStorage struct {
-	bot.Storage
+	ejdb *goejdb.Ejdb
 }
 
 type ejdbMetadata struct {
@@ -23,12 +23,12 @@ type collectionMetadata struct {
 }
 
 func (storage *manageStorage) Move(from string, to string) (int, error) {
-	fromCol, err := storage.GetColl(from)
+	fromCol, err := storage.ejdb.GetColl(from)
 	if err != nil {
 		return 0, err
 	}
 
-	toCol, err := storage.GetColl(to)
+	toCol, err := storage.ejdb.GetColl(to)
 	if err != nil {
 		return 0, err
 	}
@@ -47,13 +47,13 @@ func (storage *manageStorage) Move(from string, to string) (int, error) {
 		toCol.SaveBson(quote)
 	}
 
-	storage.RmColl(from, true)
+	storage.ejdb.RmColl(from, true)
 
 	return amount, nil
 }
 
 func (storage *manageStorage) Chats() (*[]collectionMetadata, error) {
-	bsonData, err := storage.Meta()
+	bsonData, err := storage.ejdb.Meta()
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (storage *manageStorage) Chats() (*[]collectionMetadata, error) {
 
 // Delete a quote form the specific channel
 func (storage *manageStorage) Delete(chat string, oid string) error {
-	coll, err := storage.GetColl(chat)
+	coll, err := storage.ejdb.GetColl(chat)
 	if err != nil {
 		return err
 	}
@@ -75,11 +75,11 @@ func (storage *manageStorage) Delete(chat string, oid string) error {
 }
 
 func (storage *manageStorage) List(chat string, amountToSkip int) (*[]quotes.Quote, error) {
-	col, err := storage.GetColl(chat)
+	col, err := storage.ejdb.GetColl(chat)
 	if err != nil {
 		return nil, err
 	}
-	query, err := storage.CreateQuery("{}")
+	query, err := storage.ejdb.CreateQuery("{}")
 	defer query.Del()
 	if err != nil {
 		return nil, err

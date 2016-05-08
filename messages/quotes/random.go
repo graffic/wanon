@@ -30,6 +30,6 @@ func (handler *randomQuote) Handle(context *bot.MessageContext) {
 }
 
 // CreateRandomQuote does nothing
-func CreateRandomQuote(context *bot.BotContext) bot.Handler {
+func CreateRandomQuote(context *bot.Context) bot.Handler {
 	return &randomQuote{createQuoteHandler(context)}
 }

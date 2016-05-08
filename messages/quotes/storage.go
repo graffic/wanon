@@ -5,12 +5,13 @@ import (
 	"math/rand"
 	"strconv"
 
-	"github.com/graffic/wanon/bot"
+	"github.com/graffic/goejdb"
+
 	"labix.org/v2/mgo/bson"
 )
 
 type quoteStorage struct {
-	bot.Storage
+	ejdb *goejdb.Ejdb
 }
 
 // Quote what a quote contains
@@ -24,7 +25,7 @@ type Quote struct {
 
 // AddQuote to the storage
 func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
-	col, err1 := storage.CreateColl(strconv.Itoa(chat), nil)
+	col, err1 := storage.ejdb.CreateColl(strconv.Itoa(chat), nil)
 	if err1 != nil {
 		return err1
 	}
@@ -44,7 +45,7 @@ func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
 
 // RQuote get a random quote - ToDo
 func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
-	col, err := storage.CreateColl(strconv.Itoa(chat), nil)
+	col, err := storage.ejdb.CreateColl(strconv.Itoa(chat), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +63,7 @@ func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
 	logger.Debug("Entries: %d, Skip: %d", count, amountToSkip)
 
 	skip := fmt.Sprintf(`{"$skip": %d}`, amountToSkip)
-	query, err := storage.CreateQuery("{}")
+	query, err := storage.ejdb.CreateQuery("{}")
 	defer query.Del()
 	if err != nil {
 		return nil, err
