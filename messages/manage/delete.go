@@ -2,7 +2,6 @@ package manage
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/graffic/wanon/bot"
 )
@@ -15,21 +14,11 @@ type deleteHandler struct {
 	storage quoteDeleter
 }
 
-func (handler *deleteHandler) Check(message *bot.Message) int {
-	return handler.check("/delete", message)
-}
-
-func (handler *deleteHandler) Handle(message *bot.Message) {
-	items := strings.Split(message.Text, " ")
-
-	if len(items) != 3 {
-		return
-	}
-
-	err := handler.storage.Delete(items[1], items[2])
+func (handler *deleteHandler) Handle(context *bot.MessageContext) {
+	err := handler.storage.Delete(context.Params["chat"], context.Params["message"])
 	if err != nil {
-		message.Reply(fmt.Sprint(err))
+		context.Message.Reply(fmt.Sprint(err))
 	} else {
-		message.Reply("Deleted")
+		context.Message.Reply("Deleted")
 	}
 }

@@ -7,8 +7,7 @@ import (
 	"syscall"
 
 	"github.com/graffic/wanon/bot"
-	"github.com/graffic/wanon/messages/manage"
-	"github.com/graffic/wanon/messages/quotes"
+	"github.com/graffic/wanon/messages"
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
@@ -53,7 +52,7 @@ func main() {
 	log.Debug("Wanon booting")
 	sigQuit()
 
-	context, err := bot.CreateContext("conf.yaml")
+	context, err := bot.CreateBotContext("conf.yaml")
 	checkFatal(err)
 
 	log.Info("All systems nominal")
@@ -61,10 +60,8 @@ func main() {
 	channel := make(chan *telegram.Message)
 	go context.API.ProcessUpdates(channel)
 
-	router := bot.Router{}
+	router := &bot.Routes{}
+	messages.Setup(router, context)
 
-	quotes.Setup(&router, context)
-	manage.Setup(&router, context)
-
-	router.RouteMessages(channel, context)
+	bot.MainLoop(channel, router)
 }

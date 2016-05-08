@@ -3,7 +3,6 @@ package manage
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/graffic/wanon/bot"
 )
@@ -17,22 +16,15 @@ type moveHandler struct {
 	storage quoteMover
 }
 
-func (handler *moveHandler) Check(message *bot.Message) int {
-	return handler.check("/move", message)
-}
-
-func (handler *moveHandler) Handle(message *bot.Message) {
-	items := strings.Split(message.Text, " ")
-	if len(items) != 3 {
-		return
-	}
-
-	amount, err := handler.storage.Move(items[1], items[2])
+func (handler *moveHandler) Handle(context *bot.MessageContext) {
+	from := context.Params["from"]
+	to := context.Params["to"]
+	amount, err := handler.storage.Move(from, to)
 
 	if err != nil {
-		log.Error("%v", err)
+		logger.Errorf("%v", err)
 		return
 	}
 
-	message.Reply(fmt.Sprintf("Moved %d quotes", amount))
+	context.Message.Reply(fmt.Sprintf("Moved %d quotes", amount))
 }

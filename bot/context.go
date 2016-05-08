@@ -1,37 +1,21 @@
 package bot
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
 
 var log = logging.MustGetLogger("wanon.bot")
 
-// Context bot context
-type Context struct {
+// BotContext is the global bot context
+type BotContext struct {
 	Storage Storage
 	Conf    *ConfService
 	API     telegram.API
 }
 
-func createAPI(conf *ConfService) (telegram.API, error) {
-	var apiConf telegram.Configuration
-	conf.Get(&apiConf)
-	api := telegram.NewAPI(&http.Client{Timeout: time.Second * 15}, apiConf)
-	result, err := api.GetMe()
-	if err != nil {
-		return nil, err
-	}
-	log.Info("%s online", result.Username)
-
-	return api, nil
-}
-
-// CreateContext creates a bot context from a configuration file
-func CreateContext(configurationFile string) (*Context, error) {
+// CreateBotContext from a configuration file
+func CreateBotContext(configurationFile string) (*BotContext, error) {
 	conf, err := LoadConf(configurationFile)
 	if err != nil {
 		return nil, err
@@ -47,5 +31,5 @@ func CreateContext(configurationFile string) (*Context, error) {
 		return nil, err
 	}
 
-	return &Context{storage, conf, api}, nil
+	return &BotContext{storage, conf, api}, nil
 }

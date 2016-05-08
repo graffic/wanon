@@ -15,15 +15,11 @@ type chatsHandler struct {
 	storage chatLister
 }
 
-func (handler *chatsHandler) Check(message *bot.Message) int {
-	return handler.check("/chats", message)
-}
-
-func (handler *chatsHandler) Handle(message *bot.Message) {
-	log.Debug("Chat database status")
+func (handler *chatsHandler) Handle(context *bot.MessageContext) {
+	logger.Debug("Chat database status")
 	chats, err := handler.storage.Chats()
 	if err != nil {
-		log.Error(fmt.Sprint(err))
+		logger.Error(fmt.Sprint(err))
 		return
 	}
 
@@ -32,5 +28,5 @@ func (handler *chatsHandler) Handle(message *bot.Message) {
 		result += fmt.Sprintf("%s: %d\n", chat.Name, chat.Records)
 	}
 
-	message.Reply(result)
+	context.Message.Reply(result)
 }

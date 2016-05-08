@@ -10,14 +10,11 @@ type randomQuote struct {
 	quoteHandler
 }
 
-func (handler *randomQuote) Check(message *bot.Message) int {
-	return handler.check("/rquote", message)
-}
-
-func (handler *randomQuote) Handle(message *bot.Message) {
+func (handler *randomQuote) Handle(context *bot.MessageContext) {
+	message := context.Message
 	quote, err := handler.storage.RQuote(message.Chat.ID)
 	if err != nil {
-		log.Error(fmt.Sprint(err))
+		logger.Error(fmt.Sprint(err))
 		return
 	}
 
@@ -28,11 +25,11 @@ func (handler *randomQuote) Handle(message *bot.Message) {
 	}
 
 	if err != nil {
-		log.Error(fmt.Sprint(err))
+		logger.Error(fmt.Sprint(err))
 	}
 }
 
 // CreateRandomQuote does nothing
-func CreateRandomQuote(context *bot.Context) bot.Handler {
+func CreateRandomQuote(context *bot.BotContext) bot.Handler {
 	return &randomQuote{createQuoteHandler(context)}
 }

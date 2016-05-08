@@ -1,6 +1,10 @@
 package bot
 
-import "github.com/graffic/wanon/telegram"
+import (
+	"strings"
+
+	"github.com/graffic/wanon/telegram"
+)
 
 // RouteNothing do nothing in handling
 const RouteNothing = 0
@@ -11,44 +15,87 @@ const (
 	RouteStop
 )
 
-// Message from the telegram router
-type Message struct {
-	*telegram.Message
-	*telegram.AnswerBack
+// MessageContext for each received message
+type MessageContext struct {
+	Params  map[string]string
+	Message *telegram.AnswerBack
 }
 
 // Handler pairs a check and a handle function
 type Handler interface {
-	Check(messages *Message) int
-	Handle(messages *Message)
+	Check(messages *MessageContext) int
+	Handle(messages *MessageContext)
 }
 
-// Router stores handlers for messages
-type Router struct {
-	handles []Handler
+// Routes stores handlers for messages
+type Routes struct {
+	Bot      BotContext
+	handlers []handler
 }
 
-// AddHandler adds a handler to the router
-func (router *Router) AddHandler(handler Handler) {
-	router.handles = append(router.handles, handler)
+type handler struct {
+	elements []string
+	actions  Handler
 }
 
-// RouteMessages checks which handler is the destination of a message
-func (router *Router) RouteMessages(messages chan *telegram.Message, context *Context) {
-	for {
-		message := <-messages
-		answer := telegram.AnswerBack{API: context.API, Message: message}
-		routerMessage := Message{message, &answer}
+// AddHandler for incoming messages
+func (router *Routes) AddHandler(definition string, givenHandler Handler) {
+	elements := strings.Split(definition, " ")
+	router.handlers = append(router.handlers, handler{elements, givenHandler})
+}
 
-		for _, handler := range router.handles {
+// Route from a telegram message channel to the respective handler
+func (router *Routes) Route(message *telegram.Message) {
+	var elements []string
+	for _, item := range strings.Split(message.Text, " ") {
+		if item == "" {
+			continue
+		}
+		elements = append(elements, item)
+	}
 
-			result := handler.Check(&routerMessage)
-			if (result & RouteAccept) > 0 {
-				handler.Handle(&routerMessage)
-			}
-			if (result & RouteStop) > 0 {
-				break
+	count := len(elements)
+	answer := telegram.AnswerBack{API: router.Bot.API, Message: message}
+	messageContext := MessageContext{map[string]string{}, &answer}
+
+	for _, handler := range router.handlers {
+		if count != len(handler.elements) {
+			continue
+		}
+		matched := true
+		for index, item := range handler.elements {
+			givenItem := elements[index]
+			switch {
+			case strings.Index(item, ":") == 0:
+				messageContext.Params[item[1:]] = givenItem
+			case item != givenItem:
+				matched = false
 			}
 		}
+		if !matched {
+			continue
+		}
+		check := handler.actions.Check(&messageContext)
+
+		switch {
+		case check == RouteAccept:
+			handler.actions.Handle(&messageContext)
+			return
+		case check == RouteStop:
+			return
+		}
+	}
+}
+
+// Router routes messages
+type Router interface {
+	Route(message *telegram.Message)
+}
+
+// MainLoop of the bot to get messages and route them
+func MainLoop(channel chan *telegram.Message, router Router) {
+	for {
+		message := <-channel
+		router.Route(message)
 	}
 }

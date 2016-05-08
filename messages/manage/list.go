@@ -3,7 +3,6 @@ package manage
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages/quotes"
@@ -18,31 +17,23 @@ type listHandler struct {
 	storage quoteLister
 }
 
-func (handler *listHandler) Check(message *bot.Message) int {
-	return handler.check("/list", message)
-}
-
-func (handler *listHandler) Handle(message *bot.Message) {
-	items := strings.Split(message.Text, " ")
-	amount := len(items)
+func (handler *listHandler) Handle(context *bot.MessageContext) {
 	skip := 0
+	chat := context.Params["chat"]
 
-	if amount < 2 {
-		message.Reply("You forgot the chat id")
-		return
-	}
-	if amount == 3 {
-		skip, _ = strconv.Atoi(items[2])
+	givenSkip, ok := context.Params["skip"]
+	if ok {
+		skip, _ = strconv.Atoi(givenSkip)
 	}
 
-	log.Debug("List quotes on %d skip: %d", items[1], skip)
-	quotes, _ := handler.storage.List(items[1], skip)
+	logger.Debug("List quotes on %d skip: %d", chat, skip)
+	quotes, _ := handler.storage.List(chat, skip)
 	var result string
 	for _, quote := range *quotes {
 		quoteStr := fmt.Sprintf("%s: <%s> %s\n", quote.ID.Hex(), quote.SaidBy, quote.What)
 		result += quoteStr
 	}
-	log.Debug(result)
-	message.Reply(result)
+	logger.Debug(result)
+	context.Message.Reply(result)
 
 }
