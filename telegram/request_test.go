@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/graffic/wanon/telegram"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -68,13 +67,13 @@ func TestCall_Get(t *testing.T) {
 type TestCallGetError struct {
 	suite.Suite
 	client  MockHTTPClient
-	request telegram.Request
+	request Request
 	err     error
 }
 
 func (suite *TestCallGetError) SetupTest() {
 	client := MockHTTPClient{}
-	suite.request = telegram.NewRequest(&suite.client, "http://telegram/")
+	suite.request = NewRequest(&suite.client, "http://telegram/")
 
 	suite.err = errors.New("404")
 	client.Mock.On("Get", "http://telegram/potato").Return(nil, suite.err)
@@ -106,12 +105,12 @@ type TestCallGetUnmarshalError struct {
 	suite.Suite
 	client  MockHTTPClient
 	body    MockCloser
-	request telegram.Request
+	request Request
 }
 
 func (suite *TestCallGetUnmarshalError) SetupTest() {
 	suite.client = MockHTTPClient{}
-	suite.request = telegram.NewRequest(&suite.client, "http://telegram/")
+	suite.request = NewRequest(&suite.client, "http://telegram/")
 
 	contents := strings.NewReader("-- WRONG JSON --")
 	suite.body = MockCloser{contents, false}
