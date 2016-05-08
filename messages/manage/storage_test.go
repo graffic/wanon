@@ -6,16 +6,15 @@ import (
 
 	"labix.org/v2/mgo/bson"
 
+	"github.com/graffic/goejdb"
 	"github.com/graffic/wanon/messages/quotes"
-	"github.com/graffic/wanon/mocks"
-	"github.com/mkilling/goejdb"
 	"github.com/stretchr/testify/assert"
 )
 
 // TestChats Return only collection with name as integer
 func TestChats(t *testing.T) {
-	var storage mocks.Storage
-	manager := managerStorage{db: &storage}
+	var storage MockStorage
+	manager := manageStorage{&storage}
 
 	metadata := ejdbMetadata{
 		"file",
@@ -51,7 +50,7 @@ func TestIntegrationList_Sorting(t *testing.T) {
 		chatColl.SaveBson(bsonBytes)
 	}
 
-	manager := managerStorage{db: storage}
+	manager := manageStorage{storage}
 
 	res, err2 := manager.List("12345", 10)
 	if err2 != nil {
@@ -80,7 +79,7 @@ func TestIntegrationList_Pagination(t *testing.T) {
 		chatColl.SaveBson(bsonBytes)
 	}
 
-	manager := managerStorage{db: storage}
+	manager := manageStorage{storage}
 
 	res, err2 := manager.List("12345", 10)
 	if err2 != nil {
