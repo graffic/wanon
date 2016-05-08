@@ -1,4 +1,4 @@
-package telegram_test
+package telegram
 
 import (
 	"errors"
@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/graffic/wanon/mocks"
 	"github.com/graffic/wanon/telegram"
 	"github.com/stretchr/testify/suite"
 )
@@ -25,14 +24,14 @@ func (closer *MockCloser) Close() error {
 // Normal get request where everything goes ok
 type TestCallGetOkSuite struct {
 	suite.Suite
-	client  mocks.HTTPClient
+	client  MockHTTPClient
 	body    MockCloser
-	request telegram.Request
+	request Request
 }
 
 func (suite *TestCallGetOkSuite) SetupTest() {
-	suite.client = mocks.HTTPClient{}
-	suite.request = telegram.NewRequest(&suite.client, "http://telegram/")
+	suite.client = MockHTTPClient{}
+	suite.request = NewRequest(&suite.client, "http://telegram/")
 
 	contents := strings.NewReader("{\"ok\": true, \"result\": 4}")
 	suite.body = MockCloser{contents, false}
@@ -68,13 +67,13 @@ func TestCall_Get(t *testing.T) {
 // Error in http.Get
 type TestCallGetError struct {
 	suite.Suite
-	client  mocks.HTTPClient
+	client  MockHTTPClient
 	request telegram.Request
 	err     error
 }
 
 func (suite *TestCallGetError) SetupTest() {
-	client := mocks.HTTPClient{}
+	client := MockHTTPClient{}
 	suite.request = telegram.NewRequest(&suite.client, "http://telegram/")
 
 	suite.err = errors.New("404")
@@ -105,13 +104,13 @@ func TestCall_GetError(t *testing.T) {
 // Error deserializing
 type TestCallGetUnmarshalError struct {
 	suite.Suite
-	client  mocks.HTTPClient
+	client  MockHTTPClient
 	body    MockCloser
 	request telegram.Request
 }
 
 func (suite *TestCallGetUnmarshalError) SetupTest() {
-	suite.client = mocks.HTTPClient{}
+	suite.client = MockHTTPClient{}
 	suite.request = telegram.NewRequest(&suite.client, "http://telegram/")
 
 	contents := strings.NewReader("-- WRONG JSON --")
