@@ -55,8 +55,8 @@ func (router *Routes) Route(message *telegram.Message) {
 	}
 
 	count := len(elements)
-	answer := telegram.AnswerBack{API: router.Bot.API, Message: message}
-	messageContext := MessageContext{map[string]string{}, &answer}
+	answer := telegram.NewAnswerBack(message, router.Bot.API)
+	messageContext := MessageContext{map[string]string{}, answer}
 
 	for _, handler := range router.handlers {
 		if count != len(handler.elements) {

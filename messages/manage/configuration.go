@@ -54,5 +54,5 @@ func Setup(handlers Handlers, context *bot.Context) {
 
 	handlers.AddHandler("/chats", &chatsHandler{handler, storage})
 	handlers.AddHandler("/delete :chat :message", &deleteHandler{handler, storage})
-	handlers.AddHandler("/move :from :to", &moveHandler{handler, storage})
+	handlers.AddHandler("/move :from :to", &moveHandler{handler, &ejdbQuoteMover{context.Storage}})
 }

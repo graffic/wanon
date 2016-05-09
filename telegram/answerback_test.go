@@ -15,7 +15,7 @@ func TestSend(t *testing.T) {
 		On("SendMessage", &SendMessage{ChatID: 42, Text: "potato"}).
 		Return(answeredMessage, nil)
 
-	answer := AnswerBack{API: api, Message: message}
+	answer := AnswerBack{message, api}
 	answer.Send("potato")
 
 	api.AssertExpectations(t)
@@ -36,7 +36,7 @@ func TestReply(t *testing.T) {
 		ReplyTo: 13}).
 		Return(answeredMessage, nil)
 
-	answer := AnswerBack{API: api, Message: message}
+	answer := AnswerBack{message, api}
 	answer.Reply("potato")
 	api.AssertExpectations(t)
 }
