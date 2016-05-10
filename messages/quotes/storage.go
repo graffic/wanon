@@ -3,7 +3,6 @@ package quotes
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
 
 	"github.com/graffic/goejdb"
 
@@ -25,7 +24,8 @@ type Quote struct {
 
 // AddQuote to the storage
 func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
-	col, err1 := storage.ejdb.CreateColl(strconv.Itoa(chat), nil)
+	collName := fmt.Sprintf("quotes_%d", chat)
+	col, err1 := storage.ejdb.CreateColl(collName, nil)
 	if err1 != nil {
 		return err1
 	}
@@ -45,7 +45,8 @@ func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
 
 // RQuote get a random quote - ToDo
 func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
-	col, err := storage.ejdb.CreateColl(strconv.Itoa(chat), nil)
+	collName := fmt.Sprintf("quotes_%d", chat)
+	col, err := storage.ejdb.CreateColl(collName, nil)
 	if err != nil {
 		return nil, err
 	}

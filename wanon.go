@@ -8,6 +8,7 @@ import (
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages"
+	"github.com/graffic/wanon/migrations"
 	"github.com/graffic/wanon/telegram"
 	"github.com/op/go-logging"
 )
@@ -26,11 +27,10 @@ func initLogging() {
 	logging.SetLevel(logging.INFO, "wanon.telegram")
 }
 
-// checkFatal exits on fatal
+// checkFatal treats errors as fatal errors (log.Fatal exits)
 func checkFatal(err error) {
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 }
 
@@ -53,6 +53,9 @@ func main() {
 	sigQuit()
 
 	context, err := bot.CreateContext("conf.yaml")
+	checkFatal(err)
+
+	err = migrations.Run(context.Storage)
 	checkFatal(err)
 
 	log.Info("All systems nominal")

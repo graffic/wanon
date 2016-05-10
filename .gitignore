@@ -1,3 +1,5 @@
 conf.yaml
 # Visual studio code
 .vscode
+# golang coverage
+coverage.out
