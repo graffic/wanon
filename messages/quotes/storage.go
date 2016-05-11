@@ -22,10 +22,19 @@ type Quote struct {
 	What    string
 }
 
+func (storage *quoteStorage) getQuoteColl(chat int) (*goejdb.EjColl, error) {
+	collName := fmt.Sprintf("quotes_%d", chat)
+
+	col, err := storage.ejdb.CreateColl(collName, nil)
+	if err != nil {
+		return nil, err
+	}
+	return col, nil
+}
+
 // AddQuote to the storage
 func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
-	collName := fmt.Sprintf("quotes_%d", chat)
-	col, err1 := storage.ejdb.CreateColl(collName, nil)
+	col, err1 := storage.getQuoteColl(chat)
 	if err1 != nil {
 		return err1
 	}
@@ -45,8 +54,7 @@ func (storage *quoteStorage) AddQuote(chat int, quote *Quote) error {
 
 // RQuote get a random quote - ToDo
 func (storage *quoteStorage) RQuote(chat int) (*Quote, error) {
-	collName := fmt.Sprintf("quotes_%d", chat)
-	col, err := storage.ejdb.CreateColl(collName, nil)
+	col, err := storage.getQuoteColl(chat)
 	if err != nil {
 		return nil, err
 	}

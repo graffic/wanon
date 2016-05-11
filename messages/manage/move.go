@@ -32,11 +32,18 @@ func (handler *moveHandler) Handle(context *bot.MessageContext) {
 	context.Message.Reply(fmt.Sprintf("Moved %d quotes", amount))
 }
 
-type ejdbQuoteMover struct {
+// NewEjdbQuoteMover creates a new quote mover
+func NewEjdbQuoteMover(db *goejdb.Ejdb) *EjdbQuoteMover {
+	return &EjdbQuoteMover{db}
+}
+
+// EjdbQuoteMover moves items from a collection to another
+type EjdbQuoteMover struct {
 	db *goejdb.Ejdb
 }
 
-func (mover *ejdbQuoteMover) Move(from string, to string) (int, error) {
+// Move from coll to coll
+func (mover *EjdbQuoteMover) Move(from string, to string) (int, error) {
 	fromCol, err := mover.db.GetColl(from)
 	if err != nil {
 		return 0, err
@@ -58,7 +65,10 @@ func (mover *ejdbQuoteMover) Move(from string, to string) (int, error) {
 	}
 
 	for _, quote := range quotes {
-		toCol.SaveBson(quote)
+		_, err := toCol.SaveBson(quote)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	mover.db.RmColl(from, true)

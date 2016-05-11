@@ -61,6 +61,11 @@ func (storage *manageStorage) Chats() (*[]collectionMetadata, error) {
 	var metadata ejdbMetadata
 	bson.Unmarshal(bsonData, &metadata)
 
+	var results []collectionMetadata
+	for _, collInfo := range metadata.Collections {
+		results = append(results, collInfo)
+	}
+
 	return &metadata.Collections, nil
 }
 

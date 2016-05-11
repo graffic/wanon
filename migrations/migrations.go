@@ -32,8 +32,19 @@ func (m Migrations) Swap(i, j int) {
 	m[i], m[j] = m[j], m[i]
 }
 
-func add(order int, migration Migration) {
+// Add a migration
+func Add(order int, migration Migration) {
 	migrations = append(migrations, &metadata{order, migration})
+}
+
+// IsPresent Checks it a migration is present
+func IsPresent(order int) bool {
+	for _, item := range migrations {
+		if item.order == order {
+			return true
+		}
+	}
+	return false
 }
 
 // Run migrations in order
@@ -52,17 +63,19 @@ func Run(db *goejdb.Ejdb) error {
 	}
 
 	for _, item := range migrations {
-		if item.order <= latest {
+		order := item.order
+		if order <= latest {
 			continue
 		}
 
 		err = item.migration(db)
 		if err != nil {
-			logger.Critical("Error in migration", item.order, err)
+			logger.Critical("Error in migration", order, err)
 			return err
 		}
 
-		err2 := versions.Add(item.order)
+		logger.Infof("Applying migration %d", order)
+		err2 := versions.Add(order)
 		if err2 != nil {
 			return err
 		}

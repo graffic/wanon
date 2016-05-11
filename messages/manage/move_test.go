@@ -61,7 +61,7 @@ func TestMoveStorage(t *testing.T) {
 	collOne.SaveJson("{}")
 	collOne.SaveJson("{}")
 
-	mover := ejdbQuoteMover{dbHelper.DB}
+	mover := NewEjdbQuoteMover(dbHelper.DB)
 	mover.Move("collOne", "collTwo")
 
 	amount, _ := collTwo.Count("{}")

@@ -3,6 +3,7 @@ package manage
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/graffic/wanon/bot"
 	"github.com/graffic/wanon/messages/quotes"
@@ -20,6 +21,11 @@ type listHandler struct {
 func (handler *listHandler) Handle(context *bot.MessageContext) {
 	skip := 0
 	chat := context.Params["chat"]
+
+	if strings.Index(chat, "quotes_") != 0 {
+		context.Message.Reply("Wrong collection")
+		return
+	}
 
 	givenSkip, ok := context.Params["skip"]
 	if ok {
